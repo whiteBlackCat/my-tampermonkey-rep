@@ -13,5 +13,5 @@
 
 (function () {
   'use strict';
-  console.log('测试github更新')
+  console.log('测试github自动更新')
 })();

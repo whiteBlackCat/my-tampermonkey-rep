@@ -13,7 +13,19 @@
 
 (function () {
   'use strict';
-  console.log('CustomADBlocker testing')
+  let isDebugMode = localStorage.getItem('isDebugMode') === 'true'
+  const log = (...args) => {
+    if (isDebugMode) {
+      args.forEach(arg => {
+        if (typeof arg === 'string') {
+          console.log(`%c${arg}`, 'background-color: yellow; font-size: 16px;')
+        } else {
+          console.log(arg)
+        }
+      })
+    }
+  }
+  log('CustomADBlocker testing')
   const getConfig = (name = 'ADBlockConfigList') => {
     if (!localStorage) return []
     let configList = localStorage.getItem(name)
@@ -59,13 +71,13 @@
   window.addEventListener('load', function () {
     let href = window.location.href
     let configList = getConfig()
-    console.log('configList', configList)
+    log('configList', configList)
     configList.forEach(item => {
       if (item.site) {
         try {
           let siteReg = new RegExp(item.site.trim().replace(/\*|\?/, val => '.' + val), 'gm')
           let selectEl = []
-          console.log('siteReg', siteReg, 'href', href)
+          log('siteReg', siteReg, 'href', href)
           if (siteReg.test(href)) {
             let filter = el => true
             if (item.filter) {
@@ -74,7 +86,7 @@
             if (item.selector) {
               let selector = item.selector.trim().replace(/;/g, ',')
               selectEl = [...document.querySelectorAll(selector)]
-              console.log('selectEl', selectEl)
+              log('selectEl', selectEl)
               selectEl.filter(filter).forEach(el => el.remove())
             } else {
               filter()

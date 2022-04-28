@@ -1,0 +1,13 @@
+[{
+  "site": "//www.hacg.cat/wp/",
+  "selector": "#custom_html-2",
+  "guid": "694a7e49-1e42-e0e9-c1e8-f42421fc6877"
+}, {
+  "site": "*",
+  "selector": "[id|=ad],[class|=ad],[id|=Ad],[class|=Ad],[id|=tuiguang],[class|=tuiguang],[id~=ads],[class~=ads],[id~=ADV],[class~=ADV],[id~=ggad],[class~=ggad],[id~=topad],[class~=topad],[id~=aswift],[class~=aswift],[id~=abox],[class~=abox],[id~=sponsor],[class~=sponsor],[id~=spread],[class~=spread]",
+  "guid": "1af16144-65c3-92b2-d9df-3e26ff9c505e"
+}, {
+  "site": "//www.baidu.com",
+  "selector": "",
+  "guid": "78e046bc-2e99-984d-b481-7237cef9040f"
+}]

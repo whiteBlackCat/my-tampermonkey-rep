@@ -41,6 +41,11 @@ console.log('testing......');
 addPageScrollShortcut();
 
 
-
+function guid() {
+  function S4() {
+    return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+  }
+  return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+}
 // 环境菜单添加配置弹窗页面
 // 配置包括 是否默认显示,显示快捷键

@@ -4,10 +4,12 @@
 // @namespace    https://gitee.com/yp_program/
 // @version      0.1.3
 // @description  广告拦截,比起一般的预设,可以自定添加指定网址的拦截对象
+// @iconURL ADBlocker.png
 // @license MIT
+// @updateURL my-tampermonkey-rep/raw/master/ADBlocker.js
 // @author       youhou999
-// @include      *
-// @noframes
+// @include http*://*
+// @resource defaultConfigUrl 
 // @grant        none
 // ==/UserScript==
 
@@ -106,6 +108,6 @@
   function guid() {
     return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
   }
-  
-  
+
+
 })();

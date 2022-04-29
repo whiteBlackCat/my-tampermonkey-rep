@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
+  <script src="https://unpkg.com/vue@next"></script>
+  <script src="https://unpkg.com/element-plus"></script>
+  <!-- <script src="./vue.global.prod.js"></script>
+  <script src="./element-plus@2.1.10.full.js"></script>
+  <link rel="stylesheet" href="./element-plus@2.1.10.css" /> -->
+  <title>ADBlockerConfig</title>
+</head>
+
+<body>
+  <div id="app">
+    <h1>ADBlocker配置</h1>
+    <input type="file" name="file" id="file" v-show="false" accept=".json" @change.native="upload" />
+    <div class="btn-tools">
+      <el-button type="primary" @click="Add">新增</el-button>
+      <el-button @click="Delete">删除</el-button>
+      <el-button @click="SaveConfig">应用配置</el-button>
+      <el-button @click="SetDefaultConfig">重置配置</el-button>
+      <el-button @click="ExportConfig">导出配置</el-button>
+      <el-button @click="ImportConfig">导入配置</el-button>
+    </div>
+    <div class="mt-4">
+      <el-table ref="table" :data="tableData" style="width: 100%" max-height="250" border table-layout="auto">
+        <el-table-column type="index" width="60"></el-table-column>
+        <el-table-column type="selection" width="60"></el-table-column>
+        <el-table-column label="操作" width="90">
+          <template #default="scope">
+            <el-button type="primary" circle @click="Edit(scope)" title="Edit">E </el-button>
+          </template>
+        </el-table-column>
+        <el-table-column prop="site" label="site" width="180"></el-table-column>
+        <el-table-column prop="selector" label="selector" width="280"></el-table-column>
+        <el-table-column prop="filter" label="filter"></el-table-column>
+      </el-table>
+    </div>
+    <el-dialog v-model="outerVisible" title="Edit" append-to-body>
+      <template #default>
+        row {{row}}
+        <el-form :model="row" label-width="120px">
+          <el-form-item label="site">
+            <el-input v-model="row.site" />
+          </el-form-item>
+          <el-form-item label="selector">
+            <el-input v-model="row.selector" type="textarea" rows="4" />
+          </el-form-item>
+          <el-form-item label="filter">
+            <el-input v-model="row.filter" type="textarea" rows="6" />
+          </el-form-item>
+        </el-form>
+        <div class="dialog-footer">
+          <el-button type="primary" @click="Save">save</el-button>
+          <el-button @click="outerVisible = false">Cancel</el-button>
+        </div>
+      </template>
+    </el-dialog>
+    <iframe id="testFrame" style="display: none;" src="D:/project/my-tampermonkey-rep/ADBlockerMiddleFrame.html"
+      frameborder="0"></iframe>
+  </div>
+  <script>
+    function guid() {
+      function S4() {
+        return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+      }
+      return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+    }
+
+    window.onload = function () {
+      Vue.createApp({
+          name: 'app',
+          data: () => ({
+            test: 123,
+            tableData: [],
+            outerVisible: false,
+            row: {},
+            rowIndex: 0,
+            frameEl: null
+          }),
+          mounted() {
+            let _this = this
+            this.frameEl = document.getElementById('testFrame')
+            this.frameEl.onload = () => {
+              this.getconfigList()
+            }
+            window.addEventListener('message', function (e) {
+              let {
+                type,
+                result
+              } = e.data
+              if (type === 'ADBlockConfigList') {
+                let configList = JSON.parse(result)
+                if (configList.length) {
+                  _this.tableData = configList
+                }
+              }
+            })
+            this.tableData = []
+          },
+          methods: {
+            SetDefaultConfig() {
+              fetch('file:///D:/project/my-tampermonkey-rep/ADBlocker.json').then(async res => {
+                console.log(res)
+                let result = await res.json()
+                this.tableData = result
+              })
+            },
+            getconfigList() {
+              this.frameEl.contentWindow.postMessage({
+                purpose: 'getADBlockConfigList'
+              }, '*')
+            },
+            setconfigList(result) {
+              this.frameEl.contentWindow.postMessage({
+                purpose: 'setADBlockConfigList',
+                result: JSON.parse(JSON.stringify(result))
+              }, '*')
+            },
+            Add() {
+              this.tableData.push({
+                guid: guid()
+              })
+            },
+            Delete() {
+              const $table = this.$refs['table']
+              let selecteds = $table.getSelectionRows()
+              let minutesRecords = this.tableData.filter(itemA => selecteds.findIndex(itemB => itemA.guid == itemB
+                .guid) == -1)
+              this.tableData = minutesRecords
+              ElementPlus.ElMessage({
+                message: 'Operation success',
+                type: 'success',
+              })
+            },
+            Save() {
+              this.tableData.splice(this.rowIndex, 1, this.row)
+              this.outerVisible = false
+              ElementPlus.ElMessage({
+                message: 'Operation success',
+                type: 'success',
+              })
+            },
+            Edit(scope) {
+              this.row = Object.assign({}, scope.row);
+              this.rowIndex = scope.$index;
+              this.outerVisible = true
+            },
+            SaveConfig() {
+              // localStorage.setItem('ADBlockConfigList', JSON.stringify(this.tableData))
+              this.setconfigList(this.tableData)
+              ElementPlus.ElMessage({
+                message: '应用成功',
+                type: 'success',
+              })
+            },
+            ExportConfig() {
+              this.saveJSON(this.tableData, 'ADBlockConfigList.json')
+            },
+            ImportConfig() {
+              let $file = document.getElementById('file')
+              $file.click();
+            },
+            saveJSON(data, filename = 'json.json') {
+              if (!data && !data.length) {
+                ElementPlus.ElMessage({
+                  message: '保存的数据为空',
+                  type: 'error',
+                });
+                return;
+              }
+              if (typeof data === 'object') {
+                data = JSON.stringify(data, undefined, 4)
+              }
+              var blob = new Blob([data], {
+                  type: 'text/json'
+                }),
+                e = document.createEvent('MouseEvents'),
+                a = document.createElement('a')
+              a.download = filename
+              a.href = window.URL.createObjectURL(blob)
+              a.dataset.downloadurl = ['text/json', a.download, a.href].join(':')
+              e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
+              a.dispatchEvent(e)
+            },
+            upload(event) {
+              let file = event.target.files[0]
+              let reader = new FileReader()
+              reader.readAsText(file, 'utf-8')
+              reader.onload = (event) => {
+                let result = JSON.parse(event.target.result)
+                this.tableData = result
+              }
+            }
+          }
+        })
+        .use(ElementPlus)
+        .mount('#app')
+    }
+  </script>
+</body>
+
+<style>
+  .dialog-footer {
+    text-align: center;
+  }
+
+  .btn-tools {
+    margin: 10px;
+  }
+</style>
+
+</html>

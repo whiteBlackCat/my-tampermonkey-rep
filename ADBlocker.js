@@ -6,11 +6,21 @@
 // @description  广告拦截,比起一般的预设,可以自定添加指定网址的拦截对象
 // @iconURL ADBlocker.png
 // @license MIT
-// @updateURL my-tampermonkey-rep/raw/master/ADBlocker.js
+// @updateURL /my-tampermonkey-rep/raw/master/ADBlocker.js
 // @author       youhou999
 // @include http*://*
-// @resource defaultConfigUrl 
-// @grant        none
+// @resource defaultConfigUrl /my-tampermonkey-rep/raw/master/ADBlocker.json
+// @connect  https://gitee.com/yp_program/
+// @grant    GM_addStyle
+// @grant    GM_addElement
+// @grant    GM_setValue
+// @grant    GM_getValue
+// @grant    GM_listValues
+// @grant    GM_registerMenuCommand
+// @grant    GM_xmlhttpRequest
+// @grant    GM_getTab
+// @grant    GM_notification
+
 // ==/UserScript==
 
 (function () {
@@ -70,36 +80,44 @@
     }
     return configList
   }
-  window.addEventListener('load', function () {
-    let href = window.location.href
-    let configList = getConfig()
-    log('configList', configList)
-    configList.forEach(item => {
-      if (item.site) {
-        try {
-          let siteReg = new RegExp(item.site.trim().replace(/\*|\?/, val => '.' + val), 'gm')
-          let selectEl = []
-          log('siteReg', siteReg, 'href', href)
-          if (siteReg.test(href)) {
-            let filter = el => true
-            if (item.filter) {
-              filter = new Function(`return ${item.filter.strim()}`)()
-            }
-            if (item.selector) {
-              let selector = item.selector.trim().replace(/;/g, ',')
-              selectEl = [...document.querySelectorAll(selector)]
-              log('selectEl', selectEl)
-              selectEl.filter(filter).forEach(el => el.remove())
-            } else {
-              filter()
-            }
+  //
+  // window.addEventListener('load', function () {
+  // let iframeEl = document.createElement('iframe')
+  // iframeEl.src = 'https://gitee.com/yp_program/my-tampermonkey-rep/raw/master/ADBlockerMiddleFrame.html'
+  // GM_addElement('iframe', {
+  //   src: 'https://gitee.com/yp_program/my-tampermonkey-rep/raw/master/ADBlockerMiddleFrame.html',
+  //   style: 'display:none;',
+  //   id:'CustomADBlockerIframe'
+  // });
+  let href = window.location.href
+  let configList = getConfig()
+  log('configList', configList)
+  configList.forEach(item => {
+    if (item.site) {
+      try {
+        let siteReg = new RegExp(item.site.trim().replace(/\*|\?/, val => '.' + val), 'gm')
+        let selectEl = []
+        log('siteReg', siteReg, 'href', href)
+        if (siteReg.test(href)) {
+          let filter = el => true
+          if (item.filter) {
+            filter = new Function(`return ${item.filter.strim()}`)()
           }
-        } catch (error) {
-
+          if (item.selector) {
+            let selector = item.selector.trim().replace(/;/g, ',')
+            selectEl = [...document.querySelectorAll(selector)]
+            log('selectEl', selectEl)
+            selectEl.filter(filter).forEach(el => el.remove())
+          } else {
+            filter()
+          }
         }
+      } catch (error) {
+
       }
-    })
+    }
   })
+  // })
 
   function S4() {
     return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);

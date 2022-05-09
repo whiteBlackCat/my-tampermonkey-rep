@@ -8,9 +8,6 @@
   <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
   <script src="https://unpkg.com/vue@next"></script>
   <script src="https://unpkg.com/element-plus"></script>
-  <!-- <script src="./vue.global.prod.js"></script>
-  <script src="./element-plus@2.1.10.full.js"></script>
-  <link rel="stylesheet" href="./element-plus@2.1.10.css" /> -->
   <title>ADBlockerConfig</title>
 </head>
 
@@ -104,7 +101,8 @@
           },
           methods: {
             SetDefaultConfig() {
-              fetch('file:///D:/project/my-tampermonkey-rep/ADBlocker.json').then(async res => {
+              fetch('https://gitee.com/yp_program/my-tampermonkey-rep/raw/master/ADBlocker.json').then(
+            async res => {
                 console.log(res)
                 let result = await res.json()
                 this.tableData = result

@@ -80,44 +80,44 @@
     }
     return configList
   }
-  //
-  // window.addEventListener('load', function () {
-  // let iframeEl = document.createElement('iframe')
-  // iframeEl.src = 'https://gitee.com/yp_program/my-tampermonkey-rep/raw/master/ADBlockerMiddleFrame.html'
-  // GM_addElement('iframe', {
-  //   src: 'https://gitee.com/yp_program/my-tampermonkey-rep/raw/master/ADBlockerMiddleFrame.html',
-  //   style: 'display:none;',
-  //   id:'CustomADBlockerIframe'
-  // });
-  let href = window.location.href
-  let configList = getConfig()
-  log('configList', configList)
-  configList.forEach(item => {
-    if (item.site) {
-      try {
-        let siteReg = new RegExp(item.site.trim().replace(/\*|\?/, val => '.' + val), 'gm')
-        let selectEl = []
-        log('siteReg', siteReg, 'href', href)
-        if (siteReg.test(href)) {
-          let filter = el => true
-          if (item.filter) {
-            filter = new Function(`return ${item.filter.strim()}`)()
-          }
-          if (item.selector) {
-            let selector = item.selector.trim().replace(/;/g, ',')
-            selectEl = [...document.querySelectorAll(selector)]
-            log('selectEl', selectEl)
-            selectEl.filter(filter).forEach(el => el.remove())
-          } else {
-            filter()
-          }
-        }
-      } catch (error) {
 
+  window.addEventListener('load', function () {
+    let iframeEl = document.createElement('iframe')
+    iframeEl.src = 'https://gitee.com/yp_program/my-tampermonkey-rep/raw/master/ADBlockerMiddleFrame.html'
+    GM_addElement('iframe', {
+      src: 'https://gitee.com/yp_program/my-tampermonkey-rep/raw/master/ADBlockerMiddleFrame.html',
+      // style: 'display:none;',
+      id: 'CustomADBlockerIframe'
+    });
+    let href = window.location.href
+    let configList = getConfig()
+    log('configList', configList)
+    configList.forEach(item => {
+      if (item.site) {
+        try {
+          let siteReg = new RegExp(item.site.trim().replace(/\*|\?/, val => '.' + val), 'gm')
+          let selectEl = []
+          log('siteReg', siteReg, 'href', href)
+          if (siteReg.test(href)) {
+            let filter = el => true
+            if (item.filter) {
+              filter = new Function(`return ${item.filter.strim()}`)()
+            }
+            if (item.selector) {
+              let selector = item.selector.trim().replace(/;/g, ',')
+              selectEl = [...document.querySelectorAll(selector)]
+              log('selectEl', selectEl)
+              selectEl.filter(filter).forEach(el => el.remove())
+            } else {
+              filter()
+            }
+          }
+        } catch (error) {
+
+        }
       }
-    }
+    })
   })
-  // })
 
   function S4() {
     return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
